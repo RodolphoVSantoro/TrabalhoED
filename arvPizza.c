@@ -173,7 +173,7 @@ ArvBM divisao(ArvBM b, int i, ArvBM a){
 	c.folha = a.folha;
 	escreve_no(c);
 	int j;
-	if(!a.folha){
+	if(a.folha==0){
 		c.nk = t-1;
 		atualiza_nchaves(c);
 		for(j=0;j<t-1;j++){
@@ -205,7 +205,7 @@ ArvBM divisao(ArvBM b, int i, ArvBM a){
 
 ArvBM insere_nao_completo(ArvBM a, Pizza *p){
 	int i;
-	if(a.folha){
+	if(a.folha==1){
 		for(i=a.nk-1;i>=0 && p->cod < get_chave(a, i);i--){
 			Pizza *tmp = get_pizza(a, i);
 			if(!tmp){
@@ -222,12 +222,14 @@ ArvBM insere_nao_completo(ArvBM a, Pizza *p){
 	while(i>=0 && p->cod < get_chave(a, i)) i--;
 	i++;
 	ArvBM filho = get_filho(a, i);
-	if(x->filho[i]->nchaves == ((2*t)-1)){
-		x = divisao(x, (i+1), x->filho[i], t);
-		if(mat > x->chave[i])i++;
+	if(filho.nk == (2*t-1)){
+		a = divisao(a, i+1, filho);
+		if(p->cod > get_chave(filho, i))
+			i++;
 	}
-	x->filho[i] = insere_nao_completo(x->filho[i], mat, t);
-	return x;
+	filho = get_filho(a, i);
+	filho = insere_nao_completo(filho, p);
+	return a;
 }
 
 
@@ -299,7 +301,7 @@ ArvBM get_filho(ArvBM a, int index){
 ArvBM busca_arv(ArvBM a, int key){
 	int nk = a.nk, i, k;
 	Pizza *p;
-	if(!a.folha){
+	if(a.folha==0){
 		for(i=0;i<nk;i++){
 			k = getKey(a, i);
 			if(key > k) break;
