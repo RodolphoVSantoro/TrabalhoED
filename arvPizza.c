@@ -114,7 +114,7 @@ void escreve_chave(ArvBM a, int ind, int k){
 	fclose(arq);
 }
 
-void escreve_filho(ArvBM a, int ind, int kFilho){
+void escreve_filho_key(ArvBM a, int ind, int kFilho){
 	if(a.folha==1)return;
 	int end = 2*sizeof(int)*(1+ind);
 	char fname[2048];
@@ -125,7 +125,7 @@ void escreve_filho(ArvBM a, int ind, int kFilho){
 	fclose(arq);
 }
 
-int get_filho(ArvBM a, int ind){
+int get_filho_key(ArvBM a, int ind){
 	if(a.folha==1)return;
 	int end = 2*sizeof(int)*(1+ind), k;
 	char fname[2048];
@@ -158,8 +158,13 @@ void atualiza_nchaves(ArvBM a){
 	fclose(arq);
 }
 
-void escreve_prox(){
-
+void escreve_prox(ArvBM a, int prox){
+	int end = 2*sizeof(int) + a.nk*sizeof(Pizza);
+	char fname[2048];
+	strcpy(fname, getNome(a));
+	FILE *arq = fopen(fname, "rb+");
+	fwrite(&prox, sizeof(int), 1, arq);
+	fclose(arq);
 }
 
 ArvBM divisao(ArvBM b, int i, ArvBM a){
@@ -172,10 +177,10 @@ ArvBM divisao(ArvBM b, int i, ArvBM a){
 		c.nk = t-1;
 		atualiza_nchaves(c);
 		for(j=0;j<t-1;j++){
-			escreve_chave(c, j, get_filho(a, j+t));
-			escreve_filho(c, j, get_filho(a, j+t));
+			escreve_chave(c, j, get_filho_key(a, j+t));
+			escreve_filho_key(c, j, get_filho_key(a, j+t));
 		}
-		escreve_filho(c, t-1, get_filho(a, j+t));
+		escreve_filho_key(c, t-1, get_filho_key(a, j+t));
 	}
 	else {
 		c.nk = t;
@@ -188,35 +193,41 @@ ArvBM divisao(ArvBM b, int i, ArvBM a){
 	a.nk = t;
 	atualiza_nchaves(a);
 	for(j=b.nk;j>=i;j--)
-		escreve_filho(b, j+1, get_filho(b, j));
-	escreve_filho(b, i, c.k);
+		escreve_filho_key(b, j+1, get_filho_key(b, j));
+	escreve_filho_key(b, i, c.k);
 	for(j=b.nk;j>=i;j--)
 		escreve_chave(b, j, get_chave(b, j-1));
-		x->chave[j] = x->chave[j-1];
-	x->chave[i-1] = y->chave[t-1];
-	x->nchaves++;
-	return x;
+	escreve_chave(b, i-1, get_chave(a, t-1));
+	b.nk++;
+	atualiza_nchaves(b);
+	return b;
 }
 
-TABM *insere_nao_completo(TABM *x, int mat, int t){
-  int i = x->nchaves-1;
-  if(x->folha){
-    while((i>=0) && (mat < x->chave[i])){
-      x->chave[i+1] = x->chave[i];
-      i--;
-    }
-    x->chave[i+1] = mat;
-    x->nchaves++;
-    return x;
-  }
-  while((i>=0) && (mat < x->chave[i])) i--;
-  i++;
-  if(x->filho[i]->nchaves == ((2*t)-1)){
-    x = divisao(x, (i+1), x->filho[i], t);
-    if(mat > x->chave[i]) i++;
-  }
-  x->filho[i] = insere_nao_completo(x->filho[i], mat, t);
-  return x;
+ArvBM insere_nao_completo(ArvBM a, Pizza *p){
+	int i;
+	if(a.folha){
+		for(i=a.nk-1;i>=0 && p->cod < get_chave(a, i);i--){
+			Pizza *tmp = get_pizza(a, i);
+			if(!tmp){
+				printf("Pizza com indice fora de alcance\n");
+				exit(1);
+			}
+			escreve_pizza(a, i+1, tmp);
+		}
+		escreve_pizza(a, i+1, p);
+		a.nk++;
+		atualiza_nchaves(a);
+		return a;
+	}
+	while(i>=0 && p->cod < get_chave(a, i)) i--;
+	i++;
+	ArvBM filho = get_filho(a, i);
+	if(x->filho[i]->nchaves == ((2*t)-1)){
+		x = divisao(x, (i+1), x->filho[i], t);
+		if(mat > x->chave[i])i++;
+	}
+	x->filho[i] = insere_nao_completo(x->filho[i], mat, t);
+	return x;
 }
 
 
@@ -233,12 +244,12 @@ ArvBM insere_arv(ArvBM a, Pizza *p){
 		ArvBM b = cria_no_interno(a.nome, t, key);
 		b = divisao();
 		b = insere_nao_completo();
-		//b = divisao(b,1,a,t);
-		//b = insere_nao_completo(a, mat, t);
+		b = divisao(b,1,a);
+		b = insere_nao_completo(a, p);
 		muda_raiz(b.k);
 		return b;
 	}
-	a = insere_nao_completo();
+	a = insere_nao_completo(a, p);
 	return a;
 }
 
@@ -254,39 +265,41 @@ ArvBM busca_raiz(const char* nome){
 	a.k = k;
 	fread(&t, sizeof(int), 1, arq);
 	a.t = t;
-}
-
-int isFolha(ArvBM a){
-	int folha;
-	char fname[2048];
-	strcpy(fname, getNome(a));
-	FILE *arq = fopen(fname,"r");
-	fread(&folha, sizeof(int), 1, arq);
+	a.ind=0;
+	strcpy(fname, getNome(filho));
+	arq = fopen(fname, "rb");
+	fread(&a.folha, sizeof(int), 1, arq);
+	fread(&a.nk, sizeof(int), 1, arq);
 	fclose(arq);
-	return folha;
+	return a;
 }
 
-ArvBM getFilho(ArvBM a, int index){
+ArvBM get_filho(ArvBM a, int index){
 	char fname[2048];
 	strcpy(fname, getNome(a));
 	int k;
 	FILE *arq = fopen(fname, "rb");
-	int end = getEnderecoFilho(a, index);
+	int end = 2*sizeof(int)*(1+index);
 	fread(&k, sizeof(int), 1, arq);
 	fclose(arq);
 	ArvBM filho = inicializa(a.nome);
 	filho.k=k;
 	filho.t=a.t;
+	filho.ind=0;
+	strcpy(fname, getNome(filho));
+	arq = fopen(fname, "rb");
+	fread(&filho.folha, sizeof(int), 1, arq);
+	fread(&filho.nk, sizeof(int), 1, arq);
+	fclose(arq);
 	return filho;
 }
 
 /*retorna a.k=-1 caso n existir*/
 /*retorna arvore com a.ind=indice da pizza*/
 ArvBM busca_arv(ArvBM a, int key){
-	int nk = a.nk, i, folha=0, k;
-	folha = isFolha(a);
+	int nk = a.nk, i, k;
 	Pizza *p;
-	if(!folha){
+	if(!a.folha){
 		for(i=0;i<nk;i++){
 			k = getKey(a, i);
 			if(key > k) break;
@@ -310,41 +323,11 @@ ArvBM busca_arv(ArvBM a, int key){
 	}
 }
 
-
-
 void retira_arv(ArvBM a, int key){
 
 
 
 	return;
-}
-
-/*Pega o endereco da index-esima pizza no arquivo arq*/
-int getEnderecoPizza(FILE *arq, int index){
-	int tmp = ftell(arq);
-	rewind(arq);
-	int end = ftell(arq);
-	fseek(arq, tmp, SEEK_SET);
-	end += 2*sizeof(int) + index*sizeof(Pizza);
-	return end;
-}
-
-int getEnderecoFilho(FILE *arq, int index){
-	int tmp = ftell(arq);
-	rewind(arq);
-	int end = ftell(arq);
-	fseek(arq, tmp, SEEK_SET);
-	end += 2*sizeof(int) + 2*index*sizeof(int);
-	return end;
-}
-
-int getEnderecoKey(FILE *arq, int index){
-	int tmp = ftell(arq);
-	rewind(arq);
-	int end = ftell(arq);
-	fseek(arq, tmp, SEEK_SET);
-	end += 2*sizeof(int) + 2*index*sizeof(int) + sizeof(int);
-	return end;
 }
 
 int getNKeys(ArvBM a){
@@ -358,28 +341,18 @@ int getNKeys(ArvBM a){
 	return nkeys;
 }
 
-Pizza* getPizza(ArvBM a, int ind){
+Pizza* get_pizza(ArvBM a, int ind){
+	if(ind>=a.nk)return NULL;
+	if(!a.folha)return NULL;
 	char fname[2048];
 	strcpy(fname,getNome(a));
 	FILE *arq = fopen(fname, "rb");
-	int end = getEnderecoPizza(arq, ind);
+	int end = 2*sizeof(int)*(1+ind);
 	Pizza *p=(Pizza*)malloc(sizeof(Pizza));
 	fseek(arq, end, SEEK_SET);
 	fread(p, sizeof(Pizza), 1, arq);
 	fclose(arq);
 	return p;
-}
-
-int getKey(ArvBM a, int ind){
-	int key
-	char fname[2048];
-	strcpy(fname,getNome(a));
-	FILE *arq = fopen(fname, "rb");
-	int end = getEnderecoKey(arq, ind);
-	fseek(arq, end, SEEK_SET);
-	fread(&key, sizeof(int), 1, arq);
-	fclose(arq);
-	return p;	
 }
 
 Pizza* buscaPizza(ArvBM a, int key){
@@ -422,8 +395,7 @@ void alteraPizza(ArvBM a, int key, float preco, char nome[51], char categoria[21
 	char fname[2048];
 	strcpy(fname, getNome(ap));
 	FILE *arq = fopen(fname, "rb+");
-	int end = getEnderecoPizza(arq, ind);
+	int end = 2*sizeof(int) + ind*sizeof(Pizza);
 	fseek(arq, end, SEEK_SET);
 	fwrite(p, sizeof(Pizza), 1, arq);
 }
-

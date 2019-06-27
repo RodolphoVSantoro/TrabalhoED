@@ -33,19 +33,42 @@ void libera_lista(ListaPizza *l);
 */
 /*nome é a pasta onde ficam os arquivos de indices, dados, categorias e raiz*/
 /*ind é usado para retorno de funcao que busca um id especifico, indice referente a esse id*/
-
 typedef struct arvbm{
-	int t, k, ind;
-	char *nome;
+	int t, k, ind, nk, folha;
+	char nome[2048];
 }ArvBM;
 
-ArvBM cria_arv(ArvBM a, int t);
+const char* getNome(ArvBM a);
+void cria_raiz(const char* nome);
+void muda_raiz(const char* nome, int cod);
+ArvBM inicializa(const char *nome);
+ArvBM cria_arvore(const char* nome, int t);
+ArvBM cria_folha(const char* nome, int t, Pizza *p);
+ArvBM cria_no_interno(const char* nome, int t, int key);
 void libera_arv(ArvBM a);
-void insere_arv(ArvBM a, int t, Pizza *p);
-void retira_arv(ArvBM a, int t, int key);
-arvbm busca_arv(ArvBM a, int t);
-Pizza* busca_pizza(ArvBM a, int key);
+void escreve_no(ArvBM a);
+void escreve_chave(ArvBM a, int ind, int k);
+void escreve_filho_key(ArvBM a, int ind, int kFilho);
+int get_filho_key(ArvBM a, int ind);
+int get_chave(ArvBM a, int ind);
+void atualiza_nchaves(ArvBM a);
+void escreve_prox(ArvBM a, int prox);
+ArvBM divisao(ArvBM b, int i, ArvBM a);
+ArvBM insere_nao_completo(ArvBM a, Pizza *p);
+/* modifica os nos de indice se preciso*/
+ArvBM insere_arv(ArvBM a, Pizza *p);
+/*recupera dados de uma arvore do hd apos abrir o programa depois que ela foi criada*/
+ArvBM busca_raiz(const char* nome);
+ArvBM get_filho(ArvBM a, int index);
+/*retorna a.k=-1 caso n existir*/
+/*retorna arvore com a.ind=indice da pizza*/
+ArvBM busca_arv(ArvBM a, int key);
+void retira_arv(ArvBM a, int key);
+int getNKeys(ArvBM a);
+Pizza* get_pizza(ArvBM a, int ind);
+Pizza* buscaPizza(ArvBM a, int key);
 ListaPizza* busca_categoria_arv(ArvBM a,  char categoria[21]);
 void retira_categoria_arv(ArvBM a, char categoria[21]);
+void alteraPizza(ArvBM a, int key, float preco, char nome[51], char categoria[21]);
 
 #endif
