@@ -1,0 +1,50 @@
+10, Calabresa (Salgada), R$ 30.00
+13, Portuguesa (Salgada), R$ 32.00
+15, Bianca (Salgada), R$ 30.00
+18, Estrogonoff com Cogumelos (Especial), R$ 40.00
+20, Lombinho (Salgada), R$ 32.00
+21, Prestigio (Doce), R$ 25.00
+23, Presunto Parma com Rucula (Especial), R$ 50.00
+25, Banana (Doce), R$ 25.00
+26, Frango (Salgada), R$ 31.00
+28, Havaiana (Salgada), R$ 33.00
+31, Banana com Nutela (Doce Especial), R$ 42.00
+35, Camarao (Salgada), R$ 35.00
+37, Chocolate com Morango (Doce), R$ 28.00
+38, Calabresa Acebolada (Salgada), R$ 30.00
+39, Frango com Catupiry (Salgada), R$ 35.00
+40, Camarao com Cogumelos (Especial), R$ 51.00
+42, Queijo Brie com Damasco (Doce Especial), R$ 51.00
+45, Quatro Queijos (Salgada), R$ 35.00
+50, Marguerita (Salgada), R$ 28.00
+55, Morango com Nutella (Doce Especial), R$ 45.00
+60, Presunto, Queijo e Tomate (Salgada), R$ 31.00
+70, Muzzarela (Salgada), R$ 28.00
+77, Atum (Salgada), R$ 29.00
+79, Aliche (Salgada), R$ 30.00
+83, Picadinho de Filet (Salgada), R$ 35.00
+85, Calabresa Picante (Salgada), R$ 31.00
+87, Lombinho com Catupiry (Salgada), R$ 37.00
+90, Brocolis com Alho (Vegetariana), R$ 28.00
+93, Rucula (Vegetariana), R$ 29.00
+95, Rucula com Tomate Seco (Especial), R$ 40.00
+96, Palmito (Vegetariana), R$ 37.00
+98, Caprese (Vegetariana), R$ 39.00
+102, Presunto Parma com Muzzarela de Bufala (Especial), R$ 57.00
+103, Presunto e Azeitonas (Salgada), R$ 35.00
+110, Calabresa com Catupiry (Salgada), R$ 32.00
+111, Linguica Artesanal com Cubos de Queijo Qualho (Especial), R$ 50.00
+112, Abobrinha (Vegetariana), R$ 29.00
+115, Alho e Oleo (Vegetariana), R$ 25.00
+119, Peperoni (Salgada), R$ 31.00
+121, Abobrinha, Beringela e Tomate Seco (Vegetariana), R$ 40.00
+125, Cogumelhos Especiais (Especial), R$ 57.00
+132, Peito de Peru (Salgada), R$ 24.00
+133, Coracao de Galinha (Salgada), R$ 30.00
+135, Milho com Bacon (Salgada), R$ 32.00
+137, Frango, Milho e Palmito (Salgada), R$ 27.00
+140, Camarao com Catupiry (Salgada), R$ 40.00
+141, Queijo Brie com Figo (Doce Especial), R$ 55.00
+142, Presunto e Azeitonas com Catupiry (Salgada), R$ 30.00
+144, Peperoni com Catupiry (Salgada), R$ 29.00
+146, Brocolis com Bacon (Salgada), R$ 29
