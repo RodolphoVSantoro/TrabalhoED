@@ -13,7 +13,7 @@ void cria_raiz(const char* nome){
 	char fname[2048];
 	sprintf(fname, "%s/raiz", nome);
 	FILE *arq = fopen(fname, "wb");
-	frwite(&cod, sizeof(int), 1, arq);
+	fwrite(&cod, sizeof(int), 1, arq);
 	fclose(arq);
 }
 
@@ -21,19 +21,20 @@ void muda_raiz(const char* nome, int cod){
 	char fname[2048];
 	sprintf(fname, "%s/raiz", nome);
 	FILE *arq = fopen(fname, "rb+");
-	frwite(&cod, sizeof(int), 1, arq);
+	fwrite(&cod, sizeof(int), 1, arq);
 	fclose(arq);
 }
 
 ArvBM inicializa(const char *nome){
 	ArvBM a;
 	strcpy(a.nome, nome);
-	a.k=a.t=-1;
+	a.k=a.t=a.folha=-1;
+	a.nk=0;
 	a.ind=0;
 	return a;
 }
 
-void cria_arvore(const char* nome, int t){
+ArvBM cria_arvore(const char* nome, int t){
 	char cmd[2048], fname[2048];
 	sprintf(cmd, "mkdir %s", nome);
 	system(cmd);
@@ -42,22 +43,42 @@ void cria_arvore(const char* nome, int t){
 	FILE *arq = fopen(fname, "ab");
 	fwrite(&t, sizeof(int), 1, arq);
 	fclose(arq);
+	return inicializa(nome);
 }
 
 ArvBM cria_folha(const char* nome, int t, Pizza *p){
 	ArvBM a = inicializa(nome);
 	a.t=t;
 	a.k=p->cod;
+	a.nk=1;
 	a.ind=0;
+	a.folha=1;
 	char fname[2048];
 	strcpy(fname, getNome(a));
 	FILE *arq = fopen(fname, "wb");
-	int u = 1;
 	/*primeiro 1 diz que e folha*/
-	fwrite(&u, sizeof(int), 1, arq);
+	fwrite(&a.nk, sizeof(int), 1, arq);
 	/*segundo a quantidade de chaves*/
-	fwrite(&u, sizeof(int), 1, arq);
+	fwrite(&a.nk, sizeof(int), 1, arq);
 	escreve_pizza(arq,p);
+	fclose(arq);
+	return a;
+}
+
+ArvBM cria_no_interno(const char* nome, int t, int key){
+	ArvBM a = inicializa(nome);
+	a.t=t;
+	a.k=key;
+	a.nk=1;
+	a.ind=0;
+	a.folha=0;
+	char fname[2048];
+	strcpy(fname, getNome(a));
+	FILE *arq = fopen(fname, "rb+");
+	int zero = 0;
+	fwrite(&zero, sizeof(int), 1, arq);
+	fwrite(&a.nk, sizeof(int), 1, arq);
+	fwrite(&key, sizeof(int), 1, arq);
 	fclose(arq);
 	return a;
 }
@@ -73,9 +94,152 @@ void libera_arv(ArvBM a){
 	system(cmd);
 }
 
-/* modifica os nos de indice se preciso*/
-void insere_arv(ArvBM a, Pizza *p){
+void escreve_no(ArvBM a){
+	char fname[2048];
+	strcpy(fname, getNome(a));
+	FILE *arq = fopen(fname, "wb");
+	fwrite(&a.folha, sizeof(int), 1, arq);
+	fwrite(&a.nk, sizeof(int), 1, arq);
+	fclose(arq);
+}
 
+void escreve_chave(ArvBM a, int ind, int k){
+	if(a.folha==1)return;
+	int end = 2*sizeof(int)*(1+ind) + sizeof(int);
+	char fname[2048];
+	strcpy(fname, getNome(a));
+	FILE *arq = fopen(fname, "rb+");
+	fseek(arq, end, SEEK_SET);
+	fwrite(&k, sizeof(int), 1, arq);
+	fclose(arq);
+}
+
+void escreve_filho(ArvBM a, int ind, int kFilho){
+	if(a.folha==1)return;
+	int end = 2*sizeof(int)*(1+ind);
+	char fname[2048];
+	strcpy(fname, getNome(a));
+	FILE *arq = fopen(fname, "rb+");
+	fseek(arq, end, SEEK_SET);
+	fwrite(&k, sizeof(int), 1, arq);
+	fclose(arq);
+}
+
+int get_filho(ArvBM a, int ind){
+	if(a.folha==1)return;
+	int end = 2*sizeof(int)*(1+ind), k;
+	char fname[2048];
+	strcpy(fname, getNome(a));
+	FILE *arq = fopen(fname, "rb");
+	fseek(arq, end, SEEK_SET);
+	fread(&k, sizeof(int), 1, arq);
+	fclose(arq);
+	return k;
+}
+
+int get_chave(ArvBM a, int ind){
+	if(a.folha==1)return;
+	int end = 2*sizeof(int)*(1+ind) + sizeof(int), k;
+	char fname[2048];
+	strcpy(fname, getNome(a));
+	FILE *arq = fopen(fname, "rb");
+	fseek(arq, end, SEEK_SET);
+	fread(&k, sizeof(int), 1, arq);
+	fclose(arq);
+	return k;
+}
+
+void atualiza_nchaves(ArvBM a){
+	char fname[2048];
+	strcpy(fname, getNome(a));
+	FILE *arq = fopen(fname, "rb+");
+	fseek(arq, sizeof(int), SEEK_SET);
+	fwrite(&a.nk, sizeof(int), 1, arq);
+	fclose(arq);
+}
+
+void escreve_prox(){
+
+}
+
+ArvBM divisao(ArvBM b, int i, ArvBM a){
+	ArvBM c = inicializa(b.nome);
+	int t = c.t = b.t;
+	c.folha = a.folha;
+	escreve_no(c);
+	int j;
+	if(!a.folha){
+		c.nk = t-1;
+		atualiza_nchaves(c);
+		for(j=0;j<t-1;j++){
+			escreve_chave(c, j, get_filho(a, j+t));
+			escreve_filho(c, j, get_filho(a, j+t));
+		}
+		escreve_filho(c, t-1, get_filho(a, j+t));
+	}
+	else {
+		c.nk = t;
+		atualiza_nchaves(c);
+		for(j=0;j<t;j++)
+			escreve_chave(c, j, get_chave());
+			z->chave[j] = y->chave[j+t-1];
+		escreve_prox(a, c->k);
+	}
+	a.nk = t;
+	atualiza_nchaves(a);
+	for(j=b.nk;j>=i;j--)
+		escreve_filho(b, j+1, get_filho(b, j));
+	escreve_filho(b, i, c.k);
+	for(j=b.nk;j>=i;j--)
+		escreve_chave(b, j, get_chave(b, j-1));
+		x->chave[j] = x->chave[j-1];
+	x->chave[i-1] = y->chave[t-1];
+	x->nchaves++;
+	return x;
+}
+
+TABM *insere_nao_completo(TABM *x, int mat, int t){
+  int i = x->nchaves-1;
+  if(x->folha){
+    while((i>=0) && (mat < x->chave[i])){
+      x->chave[i+1] = x->chave[i];
+      i--;
+    }
+    x->chave[i+1] = mat;
+    x->nchaves++;
+    return x;
+  }
+  while((i>=0) && (mat < x->chave[i])) i--;
+  i++;
+  if(x->filho[i]->nchaves == ((2*t)-1)){
+    x = divisao(x, (i+1), x->filho[i], t);
+    if(mat > x->chave[i]) i++;
+  }
+  x->filho[i] = insere_nao_completo(x->filho[i], mat, t);
+  return x;
+}
+
+
+/* modifica os nos de indice se preciso*/
+ArvBM insere_arv(ArvBM a, Pizza *p){
+	ArvBM res_busca = busca_arv(a, p->cod);
+	if(res_busca.k != -1)
+		return a;
+	if(a.k == -1){
+		a=cria_folha(p);
+		return a;
+	}
+	if(a.nk == (2*a.t)-1){
+		ArvBM b = cria_no_interno(a.nome, t, key);
+		b = divisao();
+		b = insere_nao_completo();
+		//b = divisao(b,1,a,t);
+		//b = insere_nao_completo(a, mat, t);
+		muda_raiz(b.k);
+		return b;
+	}
+	a = insere_nao_completo();
+	return a;
 }
 
 /*recupera dados de uma arvore do hd apos abrir o programa depois que ela foi criada*/
@@ -117,8 +281,9 @@ ArvBM getFilho(ArvBM a, int index){
 }
 
 /*retorna a.k=-1 caso n existir*/
+/*retorna arvore com a.ind=indice da pizza*/
 ArvBM busca_arv(ArvBM a, int key){
-	int nk = getNKeys(a), i, folha=0, k;
+	int nk = a.nk, i, folha=0, k;
 	folha = isFolha(a);
 	Pizza *p;
 	if(!folha){
@@ -136,7 +301,7 @@ ArvBM busca_arv(ArvBM a, int key){
 			if(key>=k)break;
 		}
 		ArvBM b = inicializa(a.nome);
-		if(key==p->cod){
+		if(p!=NULL && key==p->cod){
 			b.k=k;
 			b.ind=i;
 			b.t=a.t;
