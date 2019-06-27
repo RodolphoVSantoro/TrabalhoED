@@ -6,7 +6,7 @@
 Pizza *cria_pizza(int cod, float preco, char nome[51], char categoria[21]){
 	Pizza *p = (Pizza*)malloc(sizeof(Pizza));
 	p->cod=cod;
-	altera_pizza(preco,nome,categoria);
+	setPizza(p, preco, nome, categoria);
 	return p;
 }
 
@@ -14,16 +14,6 @@ void setPizza(Pizza *p, float preco, char nome[51], char categoria[21]){
 	p->preco=preco;
 	strcpy(p->nome, nome);
 	strcpy(p->categoria, categoria);
-}
-
-void escreve_pizza(FILE *arq, int ind, Pizza *p){
-	fseek(arq, ind, SEEK_SET);
-	fwrite(p, sizeof(Pizza), 1, arq);
-}
-
-void esreve_cod(FILE *arq, int ind, Pizza *p){
-	fseek(arq, ind, SEEK_SET);
-	fwrite(&p->cod, sizeof(int), 1, arq);
 }
 
 void insereNaCategoria(int id, char categoria[21]){

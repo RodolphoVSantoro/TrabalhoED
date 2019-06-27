@@ -14,7 +14,7 @@ ListaPizza* insere_lista(ListaPizza *l, Pizza *p){
 }
 
 ListaPizza* retira_lista(ListaPizza *l, int cod){
-	ListaPizza *ant=NULL, tmp=l;
+	ListaPizza *ant=NULL, *tmp=l;
 	while(tmp && l->p->cod!=cod){
 		ant=tmp;
 		tmp=tmp->prox;

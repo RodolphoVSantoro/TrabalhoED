@@ -9,6 +9,9 @@ typedef struct pizza{
 
 Pizza *cria_pizza(int cod, float preco, char nome[51], char categoria[21]);
 void setPizza(Pizza *p, float preco, char nome[51], char categoria[21]);
+void escreve_cod(FILE *arq, int ind, Pizza *p);
+void insereNaCategoria(int id, char categoria[21]);
+void retiraDaCategoria(int id, char categoria[21]);
 
 typedef struct nodePizza{
 	Pizza *p;
@@ -38,7 +41,7 @@ typedef struct arvbm{
 	char nome[2048];
 }ArvBM;
 
-const char* getNome(ArvBM a);
+void getNome(ArvBM a, char fname[2048]);
 void cria_raiz(const char* nome);
 void muda_raiz(const char* nome, int cod);
 ArvBM inicializa(const char *nome);
@@ -48,7 +51,8 @@ ArvBM cria_no_interno(const char* nome, int t, int key);
 void libera_arv(ArvBM a);
 void escreve_no(ArvBM a);
 void escreve_chave(ArvBM a, int ind, int k);
-void escreve_filho_key(ArvBM a, int ind, int kFilho);
+void escreve_filho_key(ArvBM a, int ind, int k);
+void escreve_pizza(ArvBM a, int ind, Pizza *p);
 int get_filho_key(ArvBM a, int ind);
 int get_chave(ArvBM a, int ind);
 void atualiza_nchaves(ArvBM a);
@@ -69,6 +73,6 @@ Pizza* get_pizza(ArvBM a, int ind);
 Pizza* buscaPizza(ArvBM a, int key);
 ListaPizza* busca_categoria_arv(ArvBM a,  char categoria[21]);
 void retira_categoria_arv(ArvBM a, char categoria[21]);
-void alteraPizza(ArvBM a, int key, float preco, char nome[51], char categoria[21]);
+void altera_pizza(ArvBM a, int key, float preco, char nome[51], char categoria[21]);
 
 #endif
