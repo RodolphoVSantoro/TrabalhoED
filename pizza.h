@@ -22,17 +22,18 @@ void imprime_lista(ListaPizza *l);
 void libera_lista(ListaPizza *l);
 
 /*k é a primeira chave no arquivo*/
-/*no inicio de todo arquivo de no, tem a primeira chave e se o no e folha*/
+/*no inicio de todo arquivo de nó, tem se o nó é folha, e quantos filhos ele tem*/
 /*
-	quando for arquivo de indices, tem em sequecia 2 ints, o segundo deles sendo quantidade de chaves desse no
-	é o primeiro sendo a primeira o filho a esquerda de k(a primeira chave dele)
-	no final do arquivo de indices, tem a chave do filho maior que todos k's
+	quando for arquivo de indices, tem em sequecia vários grupos de 2 ints, 
+	o segundo é a chave , o primeiro é o filho que tem valores menores que essa chave	
+	no final do arquivo de indices, tem a chave do filho maior que todas as chaves
 */
 /*
 	quando for arquivo de dados, tem as structs escritas em ordem, e no final, a chave do proximo irmao
 */
 /*nome é a pasta onde ficam os arquivos de indices, dados, categorias e raiz*/
 /*ind é usado para retorno de funcao que busca um id especifico, indice referente a esse id*/
+
 typedef struct arvbm{
 	int t, k, ind;
 	char *nome;
