@@ -24,7 +24,7 @@ void libera_lista(ListaPizza *l);
 /*k é a primeira chave no arquivo*/
 /*no inicio de todo arquivo de no, tem a primeira chave e se o no e folha*/
 /*
-	quando for arquivo de indices, tem em sequecia 2 ints, o segundo deles sendo as chave k em sequencia(chaves desse no)
+	quando for arquivo de indices, tem em sequecia 2 ints, o segundo deles sendo quantidade de chaves desse no
 	é o primeiro sendo a primeira o filho a esquerda de k(a primeira chave dele)
 	no final do arquivo de indices, tem a chave do filho maior que todos k's
 */
