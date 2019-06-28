@@ -41,38 +41,72 @@ typedef struct arvbm{
 	char nome[2048];
 }ArvBM;
 
+/*pega o nome referente ao arquivo da arvore a e salva em fname*/
 void getNome(ArvBM a, char fname[2048]);
+/*cria o arquivo que guarda qual nó é a raiz, e o t da árvore*/
+/*inicialmente com raiz=-1 e sem t*/
 void cria_raiz(const char* nome);
 void muda_raiz(const char* nome, int cod);
+/*inicializa os valores nescessários pra criar o nó*/
+/*inicia com número de chaves 0, indice 0 e o resto -1*/
 ArvBM inicializa(const char *nome);
+/*
+	cria a pasta onde os arquivos referentes a árvore ficam salvos,
+	o arquivo raiz, e cria um nó vazio na MP
+*/
 ArvBM cria_arvore(const char* nome, int t);
+/*cria uma folha na MP e na MS*/
 ArvBM cria_folha(const char* nome, int t, Pizza *p);
+/*cria um nó interno na MP e na MS*/
 ArvBM cria_no_interno(const char* nome, int t, int key);
+/*deleta os arquivos e a pasta da árvore*/
 void libera_arv(ArvBM a);
+/*cria na MS um nó sem keys ou pizzas*/
 void escreve_no(ArvBM a);
+/*escreve uma key no indice ind no arquivo de um nó interno a*/
 void escreve_chave(ArvBM a, int ind, int k);
+/*escreve a key inicial do filho de a no indice ind no arquivo de um nó interno a*/
 void escreve_filho_key(ArvBM a, int ind, int k);
+/*escreve uma pizza no indice ind no arquivo de uma folha a*/
 void escreve_pizza(ArvBM a, int ind, Pizza *p);
+/*pega a key inicial do filho ind do nó interno a, no seu arquivo*/
 int get_filho_key(ArvBM a, int ind);
+/*pega a key ind no arquivo do nó interno a*/
 int get_chave(ArvBM a, int ind);
+/*atualiza o número de chaves de a no seu arquivo*/
 void atualiza_nchaves(ArvBM a);
+/*escreve no final do arquivo de a(uma folha) qual a próxima folha*/
 void escreve_prox(ArvBM a, int prox);
 ArvBM divisao(ArvBM b, int i, ArvBM a);
 ArvBM insere_nao_completo(ArvBM a, Pizza *p);
-/* modifica os nos de indice se preciso*/
+/*insere fazendo as modificações nescerssárias*/
 ArvBM insere_arv(ArvBM a, Pizza *p);
-/*recupera dados de uma arvore do hd apos abrir o programa depois que ela foi criada*/
+/*recupera dados da raiz de uma arvore do hd após abrir o programa depois que ela foi criada*/
 ArvBM busca_raiz(const char* nome);
+/*pega os dados do filho index do nó interno a*/
 ArvBM get_filho(ArvBM a, int index);
-/*retorna a.k=-1 caso n existir*/
-/*retorna arvore com a.ind=indice da pizza*/
+/*
+	retorna a.k=-1 caso n existir
+	retorna o nó a que tem a pizza com cod=key, 
+	com a.ind=<indice da pizza no arquivo>
+*/
 ArvBM busca_arv(ArvBM a, int key);
+/*remove um nó da árvore*/
 void retira_arv(ArvBM a, int key);
+/*pega o número de chaves de um nó*/
 int getNKeys(ArvBM a);
+/*pega a pizza número ind do arquivo a(folha)*/
 Pizza* get_pizza(ArvBM a, int ind);
+/*
+	Procura a pizza com cod=key em a(se for folha)
+	ou em seus filhos(se for nó interno)
+ */
 Pizza* buscaPizza(ArvBM a, int key);
+/*retorna uma lista com todas as pizzas de uma categoria*/
 ListaPizza* busca_categoria_arv(ArvBM a,  char categoria[21]);
+/*retira todas as pizzas de uma categoria*/
 void retira_categoria_arv(ArvBM a, char categoria[21]);
+/*muda uma pizza*/
 void altera_pizza(ArvBM a, int key, float preco, char nome[51], char categoria[21]);
 
 #endif

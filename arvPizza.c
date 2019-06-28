@@ -247,6 +247,7 @@ ArvBM insere_arv(ArvBM a, Pizza *p){
 	ArvBM res_busca = busca_arv(a, p->cod);
 	if(res_busca.k != -1)
 		return a;
+	insereNaCategoria(p->cod, p->categoria);
 	if(a.k == -1){
 		a=cria_folha(a.nome, a.t, p);
 		return a;
@@ -390,8 +391,10 @@ void retira_categoria_arv(ArvBM a, char categoria[21]){
 	int key;
 	while(!feof(arq)){
 		fread(&key, sizeof(int), 1, arq);
-		retira_arv(a, key);		
+		retira_arv(a, key);
 	}
+	//função da stdio que remove arquivos
+	remove(categoria);
 }
 
 void altera_pizza(ArvBM a, int key, float preco, char nome[51], char categoria[21]){

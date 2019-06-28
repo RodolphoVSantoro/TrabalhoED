@@ -17,7 +17,17 @@ void setPizza(Pizza *p, float preco, char nome[51], char categoria[21]){
 }
 
 void insereNaCategoria(int id, char categoria[21]){
-	FILE *arq = fopen(categoria, "ab");
+	FILE *arq = fopen(categoria, "rb");
+	if(arq){
+		int cod;
+		while(!feof(arq)){
+			fread(&cod, sizeof(int), 1, arq);
+			if(id==cod)break;
+		}
+		fclose(arq);
+	}
+	if(id==cod)return;
+	arq = fopen(categoria, "ab");
 	fwrite(&id, sizeof(int), 1, arq);
 	fclose(arq);
 }
@@ -29,10 +39,11 @@ void retiraDaCategoria(int id, char categoria[21]){
 	fread(&s, sizeof(int), 1, arq);
 	rewind(arq);
 	fread(&k, sizeof(int), k, arq);
-	while(k!=id){
+	while(k!=id && !feof(arq)){
 		fread(&k, sizeof(int), k, arq);
 		i++;
 	}
+	if(feof(arq))return;
 	fseek(arq, i*sizeof(int), SEEK_SET);
 	fwrite(&s, sizeof(int), 1, arq);
 	fseek(arq, -1, SEEK_END);
