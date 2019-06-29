@@ -56,9 +56,9 @@ ArvBM inicializa(const char *nome);
 */
 ArvBM cria_arvore(const char* nome, int t);
 /*cria uma folha na MP e na MS*/
-ArvBM cria_folha(const char* nome, int t, Pizza *p);
+ArvBM cria_folha(ArvBM arv, Pizza *p);
 /*cria um nó interno na MP e na MS*/
-ArvBM cria_no_interno(const char* nome, int t, int key);
+ArvBM cria_no_interno(ArvBM, int key);
 /*deleta os arquivos e a pasta da árvore*/
 void libera_arv(ArvBM a);
 /*cria na MS um nó sem keys ou pizzas*/

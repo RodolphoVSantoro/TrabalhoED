@@ -46,9 +46,9 @@ ArvBM cria_arvore(const char* nome, int t){
 	return inicializa(nome);
 }
 
-ArvBM cria_folha(const char* nome, int t, Pizza *p){
-	ArvBM a = inicializa(nome);
-	a.t=t;
+ArvBM cria_folha(ArvBM arv, Pizza *p){
+	ArvBM a = inicializa(arv.nome);
+	a.t=arv.t;
 	a.k=p->cod;
 	a.nk=1;
 	a.ind=0;
@@ -65,9 +65,9 @@ ArvBM cria_folha(const char* nome, int t, Pizza *p){
 	return a;
 }
 
-ArvBM cria_no_interno(const char* nome, int t, int key){
-	ArvBM a = inicializa(nome);
-	a.t=t;
+ArvBM cria_no_interno(ArvBM arv, int key){
+	ArvBM a = inicializa(arv.nome);
+	a.t=arv.t;
 	a.k=key;
 	a.nk=1;
 	a.ind=0;
@@ -249,11 +249,11 @@ ArvBM insere_arv(ArvBM a, Pizza *p){
 		return a;
 	insereNaCategoria(p->cod, p->categoria);
 	if(a.k == -1){
-		a=cria_folha(a.nome, a.t, p);
+		a=cria_folha(a, p);
 		return a;
 	}
 	if(a.nk == (2*a.t)-1){
-		ArvBM b = cria_no_interno(a.nome, a.t, a.k);
+		ArvBM b = cria_no_interno(a, a.k);
 		b = divisao(b, 1, a);
 		b = insere_nao_completo(b, p);
 		b = divisao(b,1,a);
