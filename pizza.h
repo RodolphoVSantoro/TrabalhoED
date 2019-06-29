@@ -24,22 +24,24 @@ ListaPizza* retira_lista(ListaPizza *l, int cod);
 void imprime_lista(ListaPizza *l);
 void libera_lista(ListaPizza *l);
 
-/*k é a primeira chave no arquivo*/
+
+/*f_id é o id do arquivo, ele começa em 0, e a medida que cria outros nós, salva no arquivo "raiz" o último que criou+1*/
 /*no inicio de todo arquivo de nó, tem se o nó é folha, e quantos filhos ele tem*/
 /*
 	quando for arquivo de indices, tem em sequecia vários grupos de 2 ints, 
-	o segundo é a chave , o primeiro é o filho que tem valores menores que essa chave	
-	no final do arquivo de indices, tem a chave do filho maior que todas as chaves
+	o segundo é a chave , o primeiro é o f_id do nó que tem valores menores que essa chave
+	no final do arquivo de indices, tem o f_id do filho maior que todas as chaves
 */
 /*
-	quando for arquivo de dados, tem as structs escritas em ordem, e no final, a chave do proximo irmao
+	quando for arquivo de dados, tem as structs escritas em ordem, e no final, o f_id proximo irmao
 */
 /*nome é a pasta onde ficam os arquivos de indices, dados, categorias e raiz*/
 /*ind é usado para retorno de funcao que busca um id especifico, indice referente a esse id*/
 typedef struct arvbm{
-	int t, k, ind, nk, folha;
+	int t, f_id, ind, nk, folha;
 	char nome[2048];
 }ArvBM;
+
 
 /*pega o nome referente ao arquivo da arvore a e salva em fname*/
 void getNome(ArvBM a, char fname[2048]);
