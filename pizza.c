@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 #include "pizza.h"
 
 Pizza *cria_pizza(int cod, float preco, char nome[51], char categoria[21]){
@@ -16,10 +17,12 @@ void setPizza(Pizza *p, float preco, char nome[51], char categoria[21]){
 	strcpy(p->categoria, categoria);
 }
 
-void insereNaCategoria(int id, char categoria[21]){
-	FILE *arq = fopen(categoria, "rb");
+void insereNaCategoria(const char* nome, int id, char categoria[21]){
+	char fname[2048];
+	sprintf(fname, "%s/%s", nome, categoria);
+	FILE *arq = fopen(fname, "rb");
+	int cod=INT_MIN;
 	if(arq){
-		int cod;
 		while(!feof(arq)){
 			fread(&cod, sizeof(int), 1, arq);
 			if(id==cod)break;
@@ -27,13 +30,15 @@ void insereNaCategoria(int id, char categoria[21]){
 		fclose(arq);
 	}
 	if(id==cod)return;
-	arq = fopen(categoria, "ab");
+	arq = fopen(fname, "ab");
 	fwrite(&id, sizeof(int), 1, arq);
 	fclose(arq);
 }
 
-void retiraDaCategoria(int id, char categoria[21]){
-	FILE *arq = fopen(categoria, "rb+");
+void retiraDaCategoria(const char* nome, int id, char categoria[21]){
+	char fname[2048];
+	sprintf(fname, "%s/%s", nome, categoria);
+	FILE *arq = fopen(fname, "rb+");
 	int k, s, i=0;
 	fseek(arq, -1, SEEK_END);
 	fread(&s, sizeof(int), 1, arq);
@@ -50,4 +55,8 @@ void retiraDaCategoria(int id, char categoria[21]){
 	s = EOF;
 	fwrite(&s, sizeof(int), 1, arq);
 	fclose(arq);
+}
+
+void imprime_pizza(Pizza *p){
+	printf("%d, %s(%s), R$: %.2f\n", p->cod, p->nome, p->categoria, p->preco);
 }
