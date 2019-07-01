@@ -225,6 +225,19 @@ void escreve_prox(ArvBM a, int prox_f_id){
 	fclose(arq);
 }
 
+void imprime_prox(const char *fname, int n_arq){
+	int prox_f_id, nk;
+	FILE *arq = fopen(fname, "rb");
+	if(arq==NULL)return;
+	fseek(arq, sizeof(int), SEEK_SET);
+	fread(&nk, sizeof(int), 1, arq);
+	int end = 2*sizeof(int) + nk*sizeof(Pizza);
+	fseek(arq, end, SEEK_SET);
+	fread(&prox_f_id, sizeof(int), 1, arq);
+	fclose(arq);
+	printf("prox de %d=%d\n", n_arq, prox_f_id);
+}
+
 void imprime_raiz(const char *nome){
 	FILE *arq = fopen(nome, "rb");
 	int tmp;
@@ -311,8 +324,12 @@ ArvBM divisao(ArvBM b, int i, ArvBM *ap){
 		else
 			escreve_pizza(b, j, get_pizza(b, j-1));
 	}
-	if(b.folha!=1)
-		escreve_chave(b, i-1, get_chave_pizza(a, t-1));
+	if(b.folha!=1){
+		if(a.folha)
+			escreve_chave(b, i-1, get_chave_pizza(a, t-1));
+		else
+			escreve_chave(b, i-1, get_chave(a, t-1));
+	}
 	else
 		escreve_pizza(b, i-1, get_pizza(a, t-1));
 	b.nk++;
@@ -323,7 +340,7 @@ ArvBM divisao(ArvBM b, int i, ArvBM *ap){
 
 
 ArvBM insere_nao_completo(ArvBM a, Pizza *p){
-	int i = a.nk-1, t = a.t;
+	int i = a.nk-1, t = a.t, k;
 	if(a.folha==1){
 		while((i>=0) && (p->cod < get_chave_pizza(a, i))){
 			escreve_pizza(a, i+1, get_pizza(a, i));
@@ -340,7 +357,11 @@ ArvBM insere_nao_completo(ArvBM a, Pizza *p){
 	ArvBM filho = get_filho(a, i);
 	if(filho.nk == 2*t-1){
 		a = divisao(a, i+1, &filho);
-		if(p->cod > get_chave(a, i)) 
+		if(a.folha==1)
+			k = get_chave_pizza(a, i);
+		else
+			k = get_chave(a, i);
+		if(p->cod > k)
 			i++;
 	}
 	filho = insere_nao_completo(filho, p);

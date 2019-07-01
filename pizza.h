@@ -80,6 +80,7 @@ int get_chave(ArvBM a, int ind);
 void atualiza_nchaves(ArvBM a);
 /*escreve no final do arquivo de a(uma folha) qual o f_id da próxima folha*/
 void escreve_prox(ArvBM a, int prox_f_id);
+void imprime_prox(const char *fname, int n_arq);
 
 void imprime_raiz(const char *nome);
 void imprime_folha(const char *nome);
