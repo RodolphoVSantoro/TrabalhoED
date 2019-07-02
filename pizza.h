@@ -38,7 +38,7 @@ void libera_lista(ListaPizza *l);
 /*nome é a pasta onde ficam os arquivos de indices, dados, categorias e raiz*/
 /*ind é usado para retorno de funcao que busca um id especifico, indice referente a esse id*/
 typedef struct arvbm{
-	int t, f_id, ind, nk, folha;
+	int t, f_id, ind, nk, folha, prox;
 	char nome[2048];
 }ArvBM;
 
@@ -80,6 +80,7 @@ int get_chave(ArvBM a, int ind);
 void atualiza_nchaves(ArvBM a);
 /*escreve no final do arquivo de a(uma folha) qual o f_id da próxima folha*/
 void escreve_prox(ArvBM a, int prox_f_id);
+int get_prox(ArvBM a);
 void imprime_prox(const char *fname, int n_arq);
 
 void imprime_raiz(const char *nome);
