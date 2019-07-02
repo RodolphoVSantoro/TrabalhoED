@@ -80,6 +80,7 @@ int get_chave(ArvBM a, int ind);
 void atualiza_nchaves(ArvBM a);
 /*escreve no final do arquivo de a(uma folha) qual o f_id da próxima folha*/
 void escreve_prox(ArvBM a, int prox_f_id);
+void imprime_prox(const char *fname, int n_arq);
 
 void imprime_raiz(const char *nome);
 void imprime_folha(const char *nome);
@@ -99,8 +100,6 @@ ArvBM get_filho(ArvBM a, int index);
 	com a.ind=<indice da pizza no arquivo>
 */
 ArvBM busca_arv(ArvBM a, int key);
-/*remove um nó da árvore*/
-void retira_arv(ArvBM a, int key);
 /*pega o número de chaves de um nó*/
 int getNKeys(ArvBM a);
 /*pega a pizza número ind do arquivo a(folha)*/
@@ -122,5 +121,26 @@ void imprime(ArvBM a);
 
 /* é chamada por imprime, essa sim faz a impressão*/
 void imprime_rec(ArvBM a, int andar);
+
+
+//funções a serem usadas na remoção de um nó
+
+/*remove um nó da árvore*/
+ArvBM retira_arv(ArvBM a, int key);
+
+/* ajeita a árvore depois da remoção*/
+void arruma_arv(ArvBM no_at);
+
+/* verifica o caso em que o nó atual se encaixa*/
+int verifica_caso(ArvBM no_at);
+
+/* merges a esquerda e direita*/
+ArvBM merge_direita(ArvBM no_at);
+ArvBM merge_esquerda(ArvBM no_at);
+
+/* emprestimo de indices da esquerda e direita*/
+void empresta_direita(ArvBM no_at);
+void empresta_esquerda(ArvBM no_at);
+
 
 #endif
