@@ -598,9 +598,42 @@ ArvBM retira_arv(ArvBM a, int key){
 }
 
 int verifica_caso(ArvBM no_at){
+	return -1;
+}
 
+ArvBM merge_direita(ArvBM no_at){
+	return;
+}
+ArvBM merge_esquerda(ArvBM no_at){
+	return;
+}
+void empresta_direita(ArvBM no_at){
+	return;
+}
+void empresta_esquerda(ArvBM no_at){
+	return;
 }
 
 void arruma_arv(ArvBM no_at){
+
+	int a = verifica_caso(no_at);
+
+	//caso 1 = fazer merge a direita
+	if(a == 1){
+		merge_direita(no_at);
+	}
+	//caso 3 = fazer merge a esquerda
+	else if(a == 2){
+		merge_esquerda(no_at);
+	}
+	//caso 4 = emprestar da direita
+	else if(a == 3){
+		empresta_direita(no_at);
+	}
+	//caso 2 = emprestar da esquerda
+	else{
+		empresta_esquerda(no_at);
+	}
+
 	return;
 }
