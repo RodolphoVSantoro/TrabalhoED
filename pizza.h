@@ -38,7 +38,7 @@ void libera_lista(ListaPizza *l);
 /*nome é a pasta onde ficam os arquivos de indices, dados, categorias e raiz*/
 /*ind é usado para retorno de funcao que busca um id especifico, indice referente a esse id*/
 typedef struct arvbm{
-	int t, f_id, ind, nk, folha;
+	int t, f_id, ind, nk, folha, prox;
 	char nome[2048];
 }ArvBM;
 
@@ -80,6 +80,8 @@ int get_chave(ArvBM a, int ind);
 void atualiza_nchaves(ArvBM a);
 /*escreve no final do arquivo de a(uma folha) qual o f_id da próxima folha*/
 void escreve_prox(ArvBM a, int prox_f_id);
+int get_prox(ArvBM a);
+void imprime_prox(const char *fname, int n_arq);
 
 void imprime_raiz(const char *nome);
 void imprime_folha(const char *nome);
@@ -122,5 +124,24 @@ void imprime(ArvBM a);
 
 /* é chamada por imprime, essa sim faz a impressão*/
 void imprime_rec(ArvBM a, int andar);
+
+//funções a serem usadas na remoção de um nó
+
+/*remove um nó da árvore*/
+ArvBM retira_arv(ArvBM a, int key);
+
+/* ajeita a árvore depois da remoção*/
+void arruma_arv(ArvBM no_at);
+
+/* verifica o caso em que o nó atual se encaixa*/
+int verifica_caso(ArvBM no_at);
+
+/* merges a esquerda e direita*/
+ArvBM merge_direita(ArvBM no_at);
+ArvBM merge_esquerda(ArvBM no_at);
+
+/* emprestimo de indices da esquerda e direita*/
+void empresta_direita(ArvBM no_at);
+void empresta_esquerda(ArvBM no_at);
 
 #endif

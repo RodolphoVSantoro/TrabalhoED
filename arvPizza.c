@@ -4,14 +4,14 @@
 #include <limits.h>
 #include "pizza.h"
 
-void copia(ArvBM *c,ArvBM a){
+void copia(ArvBM *c, ArvBM a){
 	c->t = a.t;
 	c->nk = a.nk;
 	c->f_id = a.f_id;
 	c->ind = a.ind;
 	c->folha = a.folha;
+	c->prox = a.prox;
 	strcpy(c->nome, a.nome);
-	
 }
 
 void getNome(ArvBM a, char fname[2048]){
@@ -41,7 +41,7 @@ void cria_raiz(const char* nome){
 	fwrite(&f_id, sizeof(int), 1, arq);
 	fwrite(&t, sizeof(int), 1, arq);
 	fwrite(&last_f_id, sizeof(int), 1, arq);
-	fclose(arq);
+	fclose(arq);    
 }
 
 void muda_raiz(const char* nome, int f_id){
@@ -55,7 +55,7 @@ void muda_raiz(const char* nome, int f_id){
 ArvBM inicializa(const char *nome){
 	ArvBM a;
 	strcpy(a.nome, nome);
-	a.f_id=a.t=a.folha=-1;
+	a.f_id=a.t=a.folha=a.prox=-1;
 	a.nk=0;
 	a.ind=0;
 	return a;
@@ -84,6 +84,7 @@ ArvBM cria_folha(ArvBM arv, Pizza *p){
 	a.nk=1;
 	a.ind=0;
 	a.folha=1;
+ 	a.prox=-1;
 	char fname[2048];
 	getNome(a, fname);
 	FILE *arq = fopen(fname, "wb");
@@ -91,6 +92,8 @@ ArvBM cria_folha(ArvBM arv, Pizza *p){
 	fwrite(&a.folha, sizeof(int), 1, arq);
 	/*segundo a quantidade de chaves*/
 	fwrite(&a.nk, sizeof(int), 1, arq);
+ 	/*terceiro o proximo*/
+	fwrite(&a.prox, sizeof(int), 1, arq);
 	fwrite(p, sizeof(Pizza), 1, arq);
 	fclose(arq);
 	return a;
@@ -103,12 +106,14 @@ ArvBM cria_no_interno(ArvBM arv, int f_id_filho, int key){
 	a.nk=1;
 	a.ind=0;
 	a.folha=0;
+	a.prox=-1;
 	char fname[2048];
 	getNome(a, fname);
 	FILE *arq = fopen(fname, "wb");
 	int folha = 0;
 	fwrite(&folha, sizeof(int), 1, arq);
 	fwrite(&a.nk, sizeof(int), 1, arq);
+	fwrite(&a.prox, sizeof(int), 1, arq);
 	fwrite(&f_id_filho, sizeof(int), 1, arq);
 	fwrite(&key, sizeof(int), 1, arq);
 	fclose(arq);
@@ -116,6 +121,11 @@ ArvBM cria_no_interno(ArvBM arv, int f_id_filho, int key){
 }
 
 void deleta_arv(ArvBM a){
+	char fname[2048];
+	getNome(a, fname);
+	FILE *arq = fopen(fname, "rb");
+	if(arq==NULL)return;
+	fclose(arq);
 	char cmd[2048];
 	//windows
 	sprintf(cmd,"rmdir /s /q %s", a.nome);
@@ -132,12 +142,13 @@ void escreve_no(ArvBM a){
 		arq = fopen(fname, "wb");
 	fwrite(&a.folha, sizeof(int), 1, arq);
 	fwrite(&a.nk, sizeof(int), 1, arq);
+	fwrite(&a.prox, sizeof(int), 1, arq);
 	fclose(arq);
 }
 
 void escreve_chave(ArvBM a, int ind, int k){
 	if(a.folha==1)return;
-	int end = 2*sizeof(int)*(1+ind) + sizeof(int);
+	int end = sizeof(int)*(3+2*ind+1);
 	char fname[2048];
 	getNome(a, fname);
 	FILE *arq = fopen(fname, "rb+");
@@ -148,7 +159,7 @@ void escreve_chave(ArvBM a, int ind, int k){
 
 void escreve_filho_f_id(ArvBM a, int ind, int f_id){
 	if(a.folha==1)return;
-	int end = 2*sizeof(int)*(1+ind);
+	int end = sizeof(int)*(3+2*ind);
 	char fname[2048];
 	getNome(a, fname);
 	FILE *arq = fopen(fname, "rb+");
@@ -161,7 +172,7 @@ void escreve_pizza(ArvBM a, int ind, Pizza *p){
 	char fname[2048];
 	getNome(a, fname);
 	FILE *arq = fopen(fname, "rb+");
-	int end = 2*sizeof(int) + ind*sizeof(Pizza);
+	int end = 3*sizeof(int) + ind*sizeof(Pizza);
 	fseek(arq, end, SEEK_SET);
 	fwrite(p, sizeof(Pizza), 1, arq);
 	fclose(arq);
@@ -169,7 +180,7 @@ void escreve_pizza(ArvBM a, int ind, Pizza *p){
 
 int get_filho_f_id(ArvBM a, int ind){
 	if(a.folha==1)return INT_MIN;
-	int end = 2*sizeof(int)*(1+ind), f_id;
+	int end = sizeof(int)*(3+2*ind), f_id;
 	char fname[2048];
 	getNome(a, fname);
 	FILE *arq = fopen(fname, "rb");
@@ -181,7 +192,7 @@ int get_filho_f_id(ArvBM a, int ind){
 
 int get_chave_pizza(ArvBM a, int ind){
 	if(a.folha!=1)return INT_MIN;
-	int end = 2*sizeof(int) + ind*sizeof(Pizza), k;
+	int end = 3*sizeof(int) + ind*sizeof(Pizza), k;
 	Pizza *p = (Pizza*)malloc(sizeof(Pizza));
 	char fname[2048];
 	getNome(a, fname);
@@ -196,7 +207,7 @@ int get_chave_pizza(ArvBM a, int ind){
 
 int get_chave(ArvBM a, int ind){
 	if(a.folha==1)return INT_MIN;
-	int end = 2*sizeof(int)*(1+ind) + sizeof(int), k;
+	int end = sizeof(int)*(3+2*ind+1), k;
 	char fname[2048];
 	getNome(a, fname);
 	FILE *arq = fopen(fname, "rb");
@@ -216,13 +227,38 @@ void atualiza_nchaves(ArvBM a){
 }
 
 void escreve_prox(ArvBM a, int prox_f_id){
-	int end = 2*sizeof(int) + a.nk*sizeof(Pizza);
+	int end = 2*sizeof(int);
 	char fname[2048];
 	getNome(a, fname);
 	FILE *arq = fopen(fname, "rb+");
 	fseek(arq, end, SEEK_SET);
 	fwrite(&prox_f_id, sizeof(int), 1, arq);
 	fclose(arq);
+}
+
+int get_prox(ArvBM a){
+	if(a.folha!=1)return -1;
+ 	char fname[2048];
+	getNome(a, fname);
+	int prox_f_id;
+	int end = 2*sizeof(int);
+ 	FILE *arq = fopen(fname, "rb");
+	if(arq==NULL)return -1;
+	fseek(arq, end, SEEK_SET);
+	fread(&prox_f_id, sizeof(int), 1, arq);
+	fclose(arq);
+	return prox_f_id;
+}
+
+void imprime_prox(const char *fname, int n_arq){
+	int prox_f_id;
+	int end = 2*sizeof(int);
+	FILE *arq = fopen(fname, "rb");
+	if(arq==NULL)return;
+	fseek(arq, end, SEEK_SET);
+	fread(&prox_f_id, sizeof(int), 1, arq);
+	fclose(arq);
+	printf("prox de %d=%d\n", n_arq, prox_f_id);
 }
 
 void imprime_raiz(const char *nome){
@@ -241,18 +277,18 @@ void imprime_raiz(const char *nome){
 void imprime_folha(const char *nome){
 	int as;
 	FILE *arq = fopen(nome, "rb");
-	int tmp, nk;
+	int tmp, nk, prox;
 	Pizza *p = (Pizza*)malloc(sizeof(Pizza));
 	fread(&tmp, sizeof(int), 1, arq);
 	printf("folha=%d ", tmp);
 	fread(&nk, sizeof(int), 1, arq);
 	printf("nk=%d\n", nk);
+	fread(&prox, sizeof(int), 1, arq);
 	for(tmp=0;tmp<nk;tmp++){
 		fread(p, sizeof(Pizza), 1, arq);
 		imprime_pizza(p);
 	}
-	fread(&tmp, sizeof(int), 1, arq);
-	printf("prox_f_id=%d\n", tmp);
+	printf("prox_f_id=%d\n", prox);
 	fclose(arq);
 	free(p);
 	printf("\n\n");
@@ -260,11 +296,13 @@ void imprime_folha(const char *nome){
 
 void imprime_interno(const char *nome){
 	FILE *arq = fopen(nome, "rb");
-	int tmp, nk, fk, k;
+	int tmp, nk, fk, k, prox;
 	fread(&tmp, sizeof(int), 1, arq);
 	printf("folha=%d ", tmp);
 	fread(&nk, sizeof(int), 1, arq);
 	printf("nk=%d\n", nk);
+	fread(&prox, sizeof(int), 1, arq);
+	printf("prox=%d\n", prox);
 	for(tmp=0;tmp<nk;tmp++){
 		fread(&fk, sizeof(int), 1, arq);
 		fread(&k, sizeof(int), 1, arq);
@@ -292,27 +330,31 @@ ArvBM divisao(ArvBM b, int i, ArvBM *ap){
 			escreve_filho_f_id(c, j, get_filho_f_id(a, j+t));
 	}
 	else {
-		c.nk = t-1;
+		c.nk = t;
 		escreve_no(c);
-		for(j=0;j<t-1;j++)
-			escreve_pizza(c, j, get_pizza(a, j+t));
+		for(j=0;j<t;j++)
+			escreve_pizza(c, j, get_pizza(a, j+t-1));
 			//escreve_filho_f_id(c, j, get_filho_f_id(a, j+t-1));
-		a.nk=t;
+ 		escreve_prox(c, get_prox(a));
 		escreve_prox(a, c.f_id);
 	}
-	a.nk=t;
+	a.nk=t-1;
 	atualiza_nchaves(a);
-	for(j=b.nk; j>=i-1; j--)
+	for(j=b.nk; j>=i; j--)
 		escreve_filho_f_id(b, j+1, get_filho_f_id(b, j));
 	escreve_filho_f_id(b, i, c.f_id);
-	for(j=a.nk; j>=i; j--){
+	for(j=b.nk; j>=i; j--){
 		if(b.folha!=1)
 			escreve_chave(b, j, get_chave(b, j-1));
 		else
 			escreve_pizza(b, j, get_pizza(b, j-1));
 	}
-	if(b.folha!=1)
-		escreve_chave(b, i-1, get_chave_pizza(a, t-1));
+	if(b.folha!=1){
+		if(a.folha)
+			escreve_chave(b, i-1, get_chave_pizza(a, t-1));
+		else
+			escreve_chave(b, i-1, get_chave(a, t-1));
+	}
 	else
 		escreve_pizza(b, i-1, get_pizza(a, t-1));
 	b.nk++;
@@ -321,9 +363,9 @@ ArvBM divisao(ArvBM b, int i, ArvBM *ap){
 	return b;
 }
 
-
+//a = x
 ArvBM insere_nao_completo(ArvBM a, Pizza *p){
-	int i = a.nk-1, t = a.t;
+	int i = a.nk-1, t = a.t, k;
 	if(a.folha==1){
 		while((i>=0) && (p->cod < get_chave_pizza(a, i))){
 			escreve_pizza(a, i+1, get_pizza(a, i));
@@ -340,10 +382,13 @@ ArvBM insere_nao_completo(ArvBM a, Pizza *p){
 	ArvBM filho = get_filho(a, i);
 	if(filho.nk == 2*t-1){
 		a = divisao(a, i+1, &filho);
-		if(p->cod > get_chave(a, i)) 
+		if(a.folha==1) k = get_chave_pizza(a, i);
+		else k = get_chave(a, i);
+		if(p->cod > k)
 			i++;
 	}
 	filho = insere_nao_completo(filho, p);
+	atualiza_nchaves(filho);
 	//escreve_filho_f_id(a, i, filho.f_id);
 	return a;
 }
@@ -386,19 +431,22 @@ ArvBM busca_raiz(const char* nome){
 		printf("Erro ao abrir raiz\n");
 		exit(1);
 	}
-	int f_id, t;
+	int f_id, t, prox;
 	fread(&f_id, sizeof(int), 1, arq);
+ fread(&t, sizeof(int), 1, arq);
 	fclose(arq);
-	ArvBM a;
+	ArvBM a = inicializa(nome);
 	a.f_id = f_id;
-	fread(&t, sizeof(int), 1, arq);
 	a.t = t;
 	a.ind=0;
+	a.prox=-1;
+	getNome(a, fname);
 	if(a.f_id!=-1){
 		getNome(a, fname);
 		arq = fopen(fname, "rb");
 		fread(&a.folha, sizeof(int), 1, arq);
 		fread(&a.nk, sizeof(int), 1, arq);
+ 		fread(&a.prox, sizeof(int), 1, arq);
 		fclose(arq);
 	}
 	return a;
@@ -411,7 +459,7 @@ ArvBM get_filho(ArvBM a, int index){
 	getNome(a, fname);
 	int f_id;
 	FILE *arq = fopen(fname, "rb");
-	int end = 2*sizeof(int)*(1+index);
+	int end = sizeof(int)*(3+2*index);
 	fseek(arq, end, SEEK_SET);
 	fread(&f_id, sizeof(int), 1, arq);
 	fclose(arq);
@@ -426,6 +474,7 @@ ArvBM get_filho(ArvBM a, int index){
 	}
 	fread(&filho.folha, sizeof(int), 1, arq);
 	fread(&filho.nk, sizeof(int), 1, arq);
+	fread(&filho.prox, sizeof(int), 1, arq);
 	fclose(arq);
 	return filho;
 }
@@ -459,13 +508,6 @@ ArvBM busca_arv(ArvBM a, int key){
 	}
 }
 
-void retira_arv(ArvBM a, int key){
-
-
-
-	return;
-}
-
 int getNKeys(ArvBM a){
 	char fname[2048];
 	int nkeys;
@@ -483,7 +525,7 @@ Pizza* get_pizza(ArvBM a, int ind){
 	char fname[2048];
 	getNome(a,fname);
 	FILE *arq = fopen(fname, "rb");
-	int end = 2*sizeof(int) + ind*sizeof(Pizza);
+	int end = 3*sizeof(int) + ind*sizeof(Pizza);
 	Pizza *p=(Pizza*)malloc(sizeof(Pizza));
 	fseek(arq, end, SEEK_SET);
 	fread(p, sizeof(Pizza), 1, arq);
@@ -507,6 +549,7 @@ ListaPizza* busca_categoria_arv(ArvBM a,  char categoria[21]){
 		Pizza *p = buscaPizza(a, key);
 		if(p) l = insere_lista(l, p);
 	}
+	fclose(arq);
 	return l;
 }
 
@@ -517,6 +560,7 @@ void retira_categoria_arv(ArvBM a, char categoria[21]){
 		fread(&key, sizeof(int), 1, arq);
 		retira_arv(a, key);
 	}
+	fclose(arq);
 	//função da stdio que remove arquivos
 	remove(categoria);
 }
@@ -536,6 +580,7 @@ void altera_pizza(ArvBM a, int key, float preco, char nome[51], char categoria[2
 	int end = 2*sizeof(int) + ap.ind*sizeof(Pizza);
 	fseek(arq, end, SEEK_SET);
 	fwrite(p, sizeof(Pizza), 1, arq);
+	fclose(arq);
 }
 
 void imprime(ArvBM a){
@@ -560,4 +605,66 @@ void imprime_rec(ArvBM a, int andar){
 		ArvBM filho = get_filho(a, i);
 		imprime_rec(get_filho(a, i), andar+1);
 	}
+}
+
+ArvBM retira_arv(ArvBM a, int key){
+
+	if(a.f_id==-1)
+		return a;
+	int x;
+	Pizza* temp = get_pizza(a, a.nk-1);
+	Pizza* temp2;
+	for(x = a.nk-2; x >= 0; x--){
+		if(temp.cod > key){
+			temp2 = get_pizza(a, x);
+			escreve_pizza(arv, x, temp);
+			free(temp);
+			temp = temp2;
+		}
+	}
+	a.nk--;
+	atualiza_nchaves(a);
+
+	return a;
+}
+
+int verifica_caso(ArvBM no_at){
+	return -1;
+}
+
+ArvBM merge_direita(ArvBM no_at){
+	return;
+}
+ArvBM merge_esquerda(ArvBM no_at){
+	return;
+}
+void empresta_direita(ArvBM no_at){
+	return;
+}
+void empresta_esquerda(ArvBM no_at){
+	return;
+}
+
+void arruma_arv(ArvBM no_at){
+
+	int a = verifica_caso(no_at);
+
+	//caso 1 = fazer merge a direita
+	if(a == 1){
+		merge_direita(no_at);
+	}
+	//caso 3 = fazer merge a esquerda
+	else if(a == 2){
+		merge_esquerda(no_at);
+	}
+	//caso 4 = emprestar da direita
+	else if(a == 3){
+		empresta_direita(no_at);
+	}
+	//caso 2 = emprestar da esquerda
+	else{
+		empresta_esquerda(no_at);
+	}
+
+	return;
 }
