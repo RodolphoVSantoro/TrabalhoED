@@ -17,9 +17,9 @@ void setPizza(Pizza *p, float preco, char nome[51], char categoria[21]){
 	strcpy(p->categoria, categoria);
 }
 
-void insereNaCategoria(const char* nome, int id, char categoria[21]){
+void insereNaCategoria(const char* nomeArv, int id, char categoria[21]){
 	char fname[2048];
-	sprintf(fname, "%s/%s", nome, categoria);
+	sprintf(fname, "%s/%s", nomeArv, categoria);
 	FILE *arq = fopen(fname, "rb");
 	int cod=INT_MIN;
 	if(arq){
@@ -29,15 +29,15 @@ void insereNaCategoria(const char* nome, int id, char categoria[21]){
 		}
 		fclose(arq);
 	}
-	if(id==cod)return;
+	if(id==cod) return;
 	arq = fopen(fname, "ab");
 	fwrite(&id, sizeof(int), 1, arq);
 	fclose(arq);
 }
 
-void retiraDaCategoria(const char* nome, int id, char categoria[21]){
+void retiraDaCategoria(const char* nomeArv, int id, char categoria[21]){
 	char fname[2048];
-	sprintf(fname, "%s/%s", nome, categoria);
+	sprintf(fname, "%s/%s", nomeArv, categoria);
 	FILE *arq = fopen(fname, "rb+");
 	int k, s, i=0;
 	fseek(arq, -1, SEEK_END);
@@ -55,6 +55,22 @@ void retiraDaCategoria(const char* nome, int id, char categoria[21]){
 	s = EOF;
 	fwrite(&s, sizeof(int), 1, arq);
 	fclose(arq);
+}
+
+void imprimeCategoria(const char* nomeArv, char categoria[21]){
+	char fname[2048];
+	sprintf(fname, "%s/%s", nomeArv, categoria);
+	FILE *arq = fopen(fname, "rb");
+	int cod;
+	if(arq){
+		fread(&cod, sizeof(int), 1, arq);
+		while(!feof(arq)){
+			printf("%d\n", cod);
+			fread(&cod, sizeof(int), 1, arq);
+		}
+		fclose(arq);
+	}
+	else printf("Nao existe a categoria %s na arvore %s\n", categoria, nomeArv);
 }
 
 void imprime_pizza(Pizza *p){

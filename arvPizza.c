@@ -354,8 +354,7 @@ ArvBM divisao(ArvBM b, int i, ArvBM *ap){
 	return b;
 }
 
-//a = x
-ArvBM insere_nao_completo(ArvBM a, Pizza *p){
+ArvBM insere_pagina(ArvBM a, Pizza *p){
 	int i = a.nk-1, t = a.t, k;
 	if(a.folha==1){
 		while((i>=0) && (p->cod < get_chave_pizza(a, i))){
@@ -376,17 +375,17 @@ ArvBM insere_nao_completo(ArvBM a, Pizza *p){
 		if(a.folha==1) k = get_chave_pizza(a, i);
 		else k = get_chave(a, i);
 		if(p->cod > k)
-			i++;
+			filho = get_filho(a, i+1);
 	}
-	filho = insere_nao_completo(filho, p);
+	filho = insere_pagina(filho, p);
 	atualiza_nchaves(filho);
-	//escreve_filho_f_id(a, i, filho.f_id);
 	return a;
 }
 
 ArvBM insere_arv(ArvBM a, Pizza *p){
 	ArvBM res_busca = busca_arv(a, p->cod);
 	if(res_busca.f_id!=-1) return a;
+	insereNaCategoria(a.nome, p->cod, p->categoria);
 	if(a.f_id==-1){
 		a = cria_folha(a, p);
 		muda_raiz(a.nome, a.f_id);
@@ -397,11 +396,11 @@ ArvBM insere_arv(ArvBM a, Pizza *p){
 		b.nk=0;
 		atualiza_nchaves(b);
 		b = divisao(b,1,&a);
-		b = insere_nao_completo(b, p);
+		b = insere_pagina(b, p);
 		muda_raiz(b.nome, b.f_id);
 		return b;
 	}
-	a = insere_nao_completo(a, p);
+	a = insere_pagina(a, p);
 	muda_raiz(a.nome, a.f_id);
 	return a;
 }
@@ -546,6 +545,7 @@ ListaPizza* busca_categoria_arv(ArvBM a,  char categoria[21]){
 
 void retira_categoria_arv(ArvBM a, char categoria[21]){
 	FILE *arq = fopen(categoria, "rb");
+	if(arq==NULL)return;
 	int key;
 	while(!feof(arq)){
 		fread(&key, sizeof(int), 1, arq);
@@ -599,8 +599,11 @@ void imprime_rec(ArvBM a, int andar){
 }
 
 ArvBM retira_arv(ArvBM a, int key){
-	if(a.f_id==-1)
-		return a;
+	if(a.f_id==-1) return a;
+	ArvBM ap = busca_arv(a, key);
+	Pizza *p = get_pizza(ap, ap.ind);
+	retiraDaCategoria(a.nome, p->cod, p->categoria);
+	free(p);
 	int x;
 	Pizza* temp = get_pizza(a, a.nk-1);
 	Pizza* temp2;

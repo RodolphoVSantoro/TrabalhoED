@@ -10,8 +10,9 @@ typedef struct pizza{
 Pizza *cria_pizza(int cod, float preco, char nome[51], char categoria[21]);
 void setPizza(Pizza *p, float preco, char nome[51], char categoria[21]);
 void escreve_cod(FILE *arq, int ind, Pizza *p);
-void insereNaCategoria(const char* nome, int id, char categoria[21]);
-void retiraDaCategoria(const char* nome, int id, char categoria[21]);
+void insereNaCategoria(const char* nomeArv, int id, char categoria[21]);
+void retiraDaCategoria(const char* nomeArv, int id, char categoria[21]);
+void imprimeCategoria(const char* nomeArv, char categoria[21]);
 void imprime_pizza(Pizza *p);
 
 typedef struct nodePizza{
@@ -98,7 +99,7 @@ ArvBM get_filho(ArvBM a, int index);
 /*
 	retorna a.k=-1 caso n existir
 	retorna o nó a que tem a pizza com cod=key, 
-	com a.ind=<indice da pizza no arquivo>
+	com a.ind=indice da pizza no arquivo>
 */
 ArvBM busca_arv(ArvBM a, int key);
 /*remove um nó da árvore*/
